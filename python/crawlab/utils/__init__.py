@@ -49,7 +49,7 @@ def save_item(item):
     except:
         pass
 
-def save_item_2pg(item, sess, obj, sampling=100, **kw):
+def save_item_2pg(item, obj, sess, sampling=100, **kw):
     '''
     Provide map2pg=True to redirect to postgres and sampling result to mongo
     Need to provide additionally params:
