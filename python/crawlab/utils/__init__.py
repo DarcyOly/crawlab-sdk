@@ -48,3 +48,33 @@ def save_item(item):
             col.save(item)
     except:
         pass
+
+def save_item_2pg(item, sess, obj, sampling=100, **kw):
+    '''
+    Provide map2pg=True to redirect to postgres and sampling result to mongo
+    Need to provide additionally params:
+        sess = (pgsession)
+        item = (ORM instance)
+        obj = (ORM object)
+        sampling = (samply rate)  ## 100 for 1/100 of result to store in mongo, 0 for NO SAMPLING
+    '''
+    from crawlab.utils.toolbox import storeObject
+    from sqlalchemy.orm.session import Session
+    import random
+    if not (obj.__class__.__name__ == 'DeclarativeMeta' and int(sampling) >= 0 and \
+        isinstance(item, obj) and isinstance(sess, Session)):     ## Check params are valid type
+        return None
+    if not get_task_id():               ## To ensure func are called from valid node
+        return None
+    try:
+        if storeObject(obj, item, sess) == True:
+            if not sampling == 0:
+                if random.randint(1, int(sampling)) == 1:
+                    item_dict = {key:val for key,val in item.__dict__.items() if key != '_sa_instance_state'}
+                    save_item(item_dict)
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        return False
